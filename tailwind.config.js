@@ -87,6 +87,13 @@ export default {
       backgroundImage: {
         'wave-pattern': "url('/images/wave-pattern.svg')",
         'ocean-texture': "url('/images/ocean-texture.jpg')",
+        extend: {
+          backgroundImage: {
+            'seafoam-gradient': 'linear-gradient(to right, #7dd3fc, #3b82f6)',
+            'lagoon-gradient': 'linear-gradient(to right, #06b6d4, #3b82f6)',
+          },
+        },
+        
       },
     },
   },

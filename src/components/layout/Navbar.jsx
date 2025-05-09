@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../../context/AuthContext';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -13,6 +14,11 @@ const navigation = [
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <header className="bg-gradient-to-r from-ocean-blue-500 to-deep-sea-500 shadow-lg relative z-50">
@@ -49,12 +55,26 @@ export default function Navbar() {
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <Link 
-              to="/login" 
-              className="text-sm font-semibold leading-6 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors"
-            >
-              Log in <span aria-hidden="true">→</span>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-semibold text-white">
+                  {user?.name || user?.email}
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="text-sm font-semibold leading-6 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors"
+                >
+                  Log out
+                </button>
+              </div>
+            ) : (
+              <Link 
+                to="/login" 
+                className="text-sm font-semibold leading-6 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors"
+              >
+                Log in <span aria-hidden="true">→</span>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -93,13 +113,30 @@ export default function Navbar() {
                     ))}
                   </div>
                   <div className="py-6">
-                    <Link
-                      to="/login"
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-ocean-blue-600"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Log in
-                    </Link>
+                    {isAuthenticated ? (
+                      <div className="space-y-2">
+                        <div className="px-3 py-2 text-base font-semibold text-white">
+                          {user?.name || user?.email}
+                        </div>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-ocean-blue-600"
+                        >
+                          Log out
+                        </button>
+                      </div>
+                    ) : (
+                      <Link
+                        to="/login"
+                        className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-ocean-blue-600"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Log in
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

@@ -12,4 +12,15 @@ export default defineConfig({
   css: {
     postcss: true,
   },
+  resolve: {
+    alias: {
+      'firebase/app': 'firebase/app',
+      'firebase/auth': 'firebase/auth',
+      'firebase/storage': 'firebase/storage',
+      'firebase/analytics': 'firebase/analytics'
+    }
+  },
+  optimizeDeps: {
+    include: ['firebase/app', 'firebase/auth', 'firebase/storage', 'firebase/analytics']
+  }
 })

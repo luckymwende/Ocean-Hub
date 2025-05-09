@@ -2,30 +2,43 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-export default function Login() {
+export default function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, loading, error: authError } = useAuth();
+  const { signup, loading, error: authError } = useAuth();
   const [formData, setFormData] = useState({
+    displayName: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [error, setError] = useState('');
 
-  // Get the redirect path and message from location state
+  // Get the redirect path from location state, or default to home
   const from = location.state?.from || '/';
-  const redirectMessage = location.state?.message || '';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    // Validate password strength
+    if (formData.password.length < 6) {
+      setError('Password should be at least 6 characters long');
+      return;
+    }
+
     try {
-      await login(formData.email, formData.password);
+      await signup(formData.email, formData.password, formData.displayName);
       // Navigate to the page the user was trying to access
       navigate(from, { replace: true });
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.message);
     }
   };
 
@@ -46,33 +59,18 @@ export default function Login() {
           </svg>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-ocean-blue-900">
-          Sign in to your account
+          Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-ocean-blue-600">
           Or{' '}
-          <Link to="/signup" className="font-medium text-ocean-blue-600 hover:text-ocean-blue-500">
-            create a new account
+          <Link to="/login" className="font-medium text-ocean-blue-600 hover:text-ocean-blue-500">
+            sign in to your account
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {redirectMessage && (
-            <div className="mb-4 rounded-md bg-ocean-blue-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-ocean-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-ocean-blue-800">{redirectMessage}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          
           <form className="space-y-6" onSubmit={handleSubmit}>
             {(error || authError) && (
               <div className="rounded-md bg-red-50 p-4">
@@ -82,6 +80,23 @@ export default function Login() {
               </div>
             )}
             
+            <div>
+              <label htmlFor="displayName" className="block text-sm font-medium text-ocean-blue-700">
+                Display Name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="displayName"
+                  name="displayName"
+                  type="text"
+                  required
+                  value={formData.displayName}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-ocean-blue-500 focus:ring-ocean-blue-500"
+                />
+              </div>
+            </div>
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-ocean-blue-700">
                 Email address
@@ -109,7 +124,7 @@ export default function Login() {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -118,23 +133,21 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-ocean-blue-700">
+                Confirm Password
+              </label>
+              <div className="mt-1">
                 <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-ocean-blue-600 focus:ring-ocean-blue-500"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-ocean-blue-500 focus:ring-ocean-blue-500"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-ocean-blue-700">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <Link to="/forgot-password" className="font-medium text-ocean-blue-600 hover:text-ocean-blue-500">
-                  Forgot your password?
-                </Link>
               </div>
             </div>
 
@@ -144,7 +157,7 @@ export default function Login() {
                 disabled={loading}
                 className="flex w-full justify-center rounded-md bg-ocean-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ocean-blue-700 focus:outline-none focus:ring-2 focus:ring-ocean-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? 'Creating account...' : 'Create account'}
               </button>
             </div>
           </form>
